@@ -21,19 +21,29 @@ if (!function_exists('subscriptionsUser')) {
 
     function subscriptionsUser($uid)
     {
-        $user = [];
-        $arrSubscritors = existFileXML();
-        foreach ($arrSubscritors->children() as $children) {
+        $subscriptor = existFileXML();
+
+        if (!$subscriptor) {
+            exit('Error, there is a problem with a xml file');
+        }
+        $result = [];
+        $count = 0;
+        //looking for all subscriptiones
+        foreach ($subscriptor->children() as $children) {
             if ($children->user == $uid) {
                 $start = new DateTime($children->start);
-                $stop = $children->stop;
+                $stop = new DateTime($children->stop);
                 $diferent = $start->diff($stop);
                 $user['type'] = 'abbo-' . $diferent->format('%a');
-                $user['start'] = $start;
-                $user['end'] = $stop;
-                # code...
+                $user['start'] = $start->format('Y-m-d');
+                $user['end'] = $stop->format('Y-m-d');
+                $result[$count] = $user;
+                $count++;
             }
         }
-        return $user;
+        if (count($result) == 0) {
+            return response('There is no abbonamento for this user');
+        }
+        return response($result);
     }
 }
